@@ -1,3 +1,5 @@
+//Created by Grecu Narcis
+
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <Windows.h>
