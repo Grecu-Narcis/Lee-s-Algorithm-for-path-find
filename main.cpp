@@ -1,4 +1,4 @@
-//Created by Grecu Narcis
+//Created by Narcis Grecu
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -10,19 +10,31 @@
 using namespace std;
 using namespace sf;
 
-RenderWindow window(VideoMode(605, 455), "Lee's Algorithm");
+int N = 14, M = 10;
+int width = N * 50 + 5, height = M * 50 + 5;
+
+RenderWindow window(VideoMode(width, height + 50), "Lee's Algorithm");
 
 Font font;
 Text text;
 
-const int xMax = 8, yMax = 12;
 
 pair<int, int> startPoint, stopPoint;
+bool hasSetedStartPoint = 0, hasSetedStopPoint = 0;
+
+bool hasFinishedAlgorithm = 0;
 
 int Lee[50][50];
 
-int dx[] = { -1, -1, 0, 1, 1,  1,  0, -1 };
-int dy[] = {  0,  1, 1, 1, 0, -1, -1, -1 };
+
+//		 FOR Knight directions (Chess)
+//int dx[] = { -2, -2, -1, 1, 2,  2,  1, -1 };
+//int dy[] = { -1,  1,  2, 2, 1, -1, -2, -2 };
+
+
+int dx[] = { -1, 0, 1,  0, -1, 1,  1, -1 };
+int dy[] = {  0, 1, 0, -1,  1, 1, -1, -1 };
+const int directionsNumber = 8;
 
 queue<pair<int, int>> myQueue;
 
@@ -33,14 +45,14 @@ void displayRoad();
 
 
 bool isOkForLee(pair<int, int> point) {
-	if (point.first >= 0 && point.first < xMax && point.second >= 0 && point.second < yMax && !Lee[point.first][point.second])
+	if (point.first >= 0 && point.first < M && point.second >= 0 && point.second < N && !Lee[point.first][point.second])
 		return true;
 	return false;
 }
 
 
 bool isOkForRoad(pair<int, int> point) {
-	if (point.first >= 0 && point.first < xMax && point.second >= 0 && point.second < yMax)
+	if (point.first >= 0 && point.first < M && point.second >= 0 && point.second < N)
 		return true;
 	return false;
 }
@@ -59,7 +71,7 @@ void LeeAlgorithm() {
 		Sleep(25);
 		drawTable();
 
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < directionsNumber; i++) {
 			nextPoint.first = currentPoint.first + dx[i];
 			nextPoint.second = currentPoint.second + dy[i];
 
@@ -71,6 +83,7 @@ void LeeAlgorithm() {
 					ok = 1;
 			}
 		}
+		//Sleep(5000);
 	}
 
 	int stepsNumber = Lee[stopPoint.first][stopPoint.second] - 1;
@@ -82,6 +95,8 @@ void LeeAlgorithm() {
 		displayRoad();
 		text.setString("You need " + to_string(stepsNumber) + " steps to reach stop point!");
 	}
+
+	hasFinishedAlgorithm = 1;
 }
 
 void displayRoad() {
@@ -93,7 +108,7 @@ void displayRoad() {
 	pair<int, int> point;
 
 	while (road.top().first != startPoint.first || road.top().second != startPoint.second) {
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < directionsNumber; i++) {
 			point.first = road.top().first + dx[i];
 			point.second = road.top().second + dy[i];
 
@@ -114,7 +129,7 @@ void displayRoad() {
 
 
 void drawHorizontalLine(int x, int y) {
-	RectangleShape line(Vector2f(605, 5));
+	RectangleShape line(Vector2f(width, 5));
 
 	line.setPosition(x, y);
 	line.setFillColor(Color::Red);
@@ -123,7 +138,7 @@ void drawHorizontalLine(int x, int y) {
 }
 
 void drawVerticalLine(int x, int y) {
-	RectangleShape line(Vector2f(5, 405));
+	RectangleShape line(Vector2f(5, height));
 
 	line.setPosition(x, y);
 	line.setFillColor(Color::Red);
@@ -147,17 +162,17 @@ void drawTable() {
 
 	window.draw(text);
 
-	for (int i = 0; i < 13; i++)
+	for (int i = 0; i <= N; i++)
 		drawVerticalLine(50 * i, 0);
 
-	for (int i = 0; i < 9; i++)
+	for (int i = 0; i <= M; i++)
 		drawHorizontalLine(0, 50 * i);
 
 	int i, j;
 	pair<int, int> current;
 
-	for (i = 0; i < 8; i++) 
-		for (j = 0; j < 12; j++) {
+	for (i = 0; i <= M; i++)
+		for (j = 0; j <= N; j++) {
 			current = make_pair(i, j);
 			if (current == startPoint)
 				drawSquare(j * 50 + 5, i * 50 + 5, Color::Green);
@@ -168,7 +183,7 @@ void drawTable() {
 			else if (Lee[i][j] == -1)
 				drawSquare(j * 50 + 5, i * 50 + 5, Color::Magenta);
 
-			else if (Lee[i][j]==-2)
+			else if (Lee[i][j] == -2)
 				drawSquare(j * 50 + 5, i * 50 + 5, Color(0, 255, 234));
 
 			else if (Lee[i][j])
@@ -187,19 +202,22 @@ pair<int, int> getPosition(int x, int y) {
 }
 
 
-int main() {
-	window.setFramerateLimit(60);
+void setup() {
+	window.setFramerateLimit(30);
 
 	startPoint = stopPoint = make_pair(-1, -1);
-	 
-	bool hasSetedStartPoint = 0, hasSetedStopPoint = 0;
 
 	font.loadFromFile("arial.ttf");
 	text.setFont(font);
 	text.setFillColor(Color::White);
-	text.setPosition(0, 408);
+	text.setPosition(0, height + 5);
 	text.setCharacterSize(30);
 	text.setString("Select start point!");
+}
+
+
+int main() {
+	setup();
 
 	while (window.isOpen()) {
 		Event event;
@@ -210,11 +228,11 @@ int main() {
 
 			else if (event.type == Event::MouseMoved);
 
-			else if (event.type == Event::MouseButtonPressed) {
+			else if (event.type == Event::MouseButtonPressed && !hasFinishedAlgorithm) {
 				if (event.mouseButton.button == Mouse::Left) {
 					Vector2i position = Mouse::getPosition(window);
 
-					if (position.x < 605 && position.y < 405) {
+					if (position.x < width && position.y < height) {
 						if (!hasSetedStartPoint) {
 							startPoint = getPosition(position.x, position.y);
 							hasSetedStartPoint = 1;
@@ -232,12 +250,12 @@ int main() {
 
 						else {
 							pair<int, int> point = getPosition(position.x, position.y);
-							Lee[point.first][point.second] = -1;
-							while (Mouse::isButtonPressed(Mouse::Button::Left)) {
-								position = Mouse::getPosition(window);
-								point = getPosition(position.x, position.y);
+
+							while (Mouse::isButtonPressed(Mouse::Button::Left) && position.x < width && position.y < height) {
 								drawTable();
 								Lee[point.first][point.second] = -1;
+								position = Mouse::getPosition(window);
+								point = getPosition(position.x, position.y);
 							}
 						}
 					}
@@ -262,7 +280,7 @@ int main() {
 
 		}
 
-		window.clear();		
+		window.clear();
 		drawTable();
 	}
 
