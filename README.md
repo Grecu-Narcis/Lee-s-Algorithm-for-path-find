@@ -1,6 +1,6 @@
 # Lee-s-Algorithm-for-path-find
 
-This a path find visualizer created by me.
+This is a path find visualizer created by me.
 Once you compile&run the program you have to select a start point and a stop point.
 Then you will be able to create walls for the maze.
 
